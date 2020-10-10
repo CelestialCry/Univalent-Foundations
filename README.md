@@ -5,3 +5,10 @@ This is my attempt to try to implement MLTT + UA in Agda. This will either be so
 
 ### My goals
 I'm not yet fluent in Agda, but I know the semantics of the language quite well as I am very familiar with Haskell. This project will be me learning a new language, while trying to learn and understand the core consepts in UA.
+
+---
+![Agda](https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Agda%27s_official_logo.svg/1200px-Agda%27s_official_logo.svg.png)
+## Downloading Agda
+Agda is a functional programming language built with a dependent type system. This allows us to kind of program with the type system. The proposition as types correspondance can then be fully used allowing us to state proposition as types.  
+
+You can find more information about agda on the [github page](https://github.com/agda/agda) or on (read the docs)[https://agda.readthedocs.io/en/v2.6.0.1/overview.html]
