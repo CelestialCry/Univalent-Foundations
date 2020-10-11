@@ -66,14 +66,14 @@ data ℕ : 𝒰₀ ̇ where
 ℕ-iteration X x fₓ n = ℕ-recursion X x (λ _ -> fₓ) n
 
     module Arithmetics where
+    private
+        _+_ _×_ : ℕ -> ℕ -> ℕ
+        infixl 20 _+_
+        infixl 21 _×_
 
-    _+_ _×_ : ℕ -> ℕ -> ℕ
-    infixl 20 _+_
-    infixl 21 _×_
+        x + y = (ℕ-iteration ℕ x succ) y
 
-    x + y = (ℕ-iteration ℕ x succ) y
-
-    x × y = (ℕ-iteration ℕ 0 (x +_)) y
+        x × y = (ℕ-iteration ℕ 0 (x +_)) y
 
 -- Coproduct types
 
@@ -106,6 +106,8 @@ record Σ {𝒰 𝒱} {X : 𝒰 ̇} (Y : X -> 𝒱 ̇) : 𝒰 ⊔ 𝒱  ̇ where
     field
         x : X
         y : Y x
+
+infix 6 _,_
 
 pr₁ : {X : 𝒰 ̇} {Y : X -> 𝒱 ̇} -> Σ Y -> X
 pr₁ (x , _) = x
@@ -158,6 +160,8 @@ data Id {𝒰} (X : 𝒰 ̇) : X -> X -> 𝒰 ̇ where
 
 _≡_ : {X : 𝒰 ̇} -> X -> X -> 𝒰 ̇
 x ≡ y = Id _ x y
+
+infix 8 _≡_
 
 J : (X : 𝒰 ̇) (A : (x y : X) -> x ≡ y -> 𝒱 ̇) -> ((x : X) -> A x x (refl x)) -> (x y : X) (p : x ≡ y) -> A x y p
 J X A f x x (refl x) = f x
