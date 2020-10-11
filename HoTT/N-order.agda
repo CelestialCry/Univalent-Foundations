@@ -4,6 +4,7 @@ module N-order where
 
 open import Universes public
 open import MLTT public
+open Arithmetics renaming(_+_ to _+̇_)
 
 _≤_ _≥_ : ℕ -> ℕ -> 𝒰₀ ̇
 
@@ -55,4 +56,10 @@ succUp (succ x) (succ .x) (refl .(succ x)) = refl (succ (succ x))
 ≤trans zero zero (succ z) l k = *
 ≤trans zero (succ y) (succ z) l k = *
 ≤trans (succ x) (succ y) (succ z) l k = ≤trans x y z l k
+
 -- Prove the following: x ≤ y if and only if Σ z ꞉ ℕ , x + z ≡ y.
+
+≤ToΣ : (x y : ℕ) -> x ≤ y -> Σ z :- ℕ , (x +̇ z ≡ y)
+≤ToΣ zero zero leq = (0 , refl 0)
+≤ToΣ zero (succ y) leq = ?
+≤ToΣ (succ x) (succ y) leq = ?
