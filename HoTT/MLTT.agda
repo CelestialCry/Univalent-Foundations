@@ -36,7 +36,8 @@ data 𝟘 : 𝒰₀ ̇ where
 𝟘-recursion : {A : 𝒰 ̇} -> 𝟘 -> A
 𝟘-recursion ()
 
-!𝟘 = 𝟘-recursion
+!𝟘 : (A : 𝒰 ̇) -> 𝟘 -> A
+!𝟘 A = 𝟘-recursion
 
 is-empty : 𝒰 ̇ -> 𝒰 ̇
 is-empty X = X -> 𝟘
@@ -205,16 +206,45 @@ _·̇_ : {X : 𝒰 ̇} {x y z : X} -> x ≡ y -> y ≡ z -> x ≡ z
 p ·̇ q = transport (λ x -> x ≡ rhs q) (p ⁻¹) q
 
 -- Notation???
-
 _≡⟨_⟩_ : {X : 𝒰 ̇} (x : X) {y z : X} -> x ≡ y -> y ≡ z -> x ≡ z
 x ≡⟨ p ⟩ q = p · q
 
 _■ : {X : 𝒰 ̇} (x : X) -> x ≡ x
 x ■ = refl x
 
+-- Function application
 ap : {X : 𝒰 ̇} {Y : 𝒱 ̇} (f : X -> Y) {x x' : X} -> x ≡ x' -> f x ≡ f x'
 ap f p = transport (λ y -> f x ≡ f y) p (refl (f x))
     where x = lhs p
 
+-- Homotopies
 _~_ : {X : 𝒰 ̇} {A : X -> 𝒱 ̇} -> Π A -> Π A -> 𝒰 ⊔ 𝒱 ̇
 f ~ g = ∀ x -> f x ≡ g x
+
+-- Not equals
+_≢_ : {X : 𝒰 ̇} -> X -> X -> 𝒰 ̇
+x ≢ y = ¬(x ≡ y)
+
+≢-sym : {X : 𝒰 ̇} {x y : X} -> x ≢ y -> y ≢ x
+≢-sym neq p = neq (p ⁻¹)
+
+-- Transporting identifications to functions between identified types
+Id→Fun : {X Y : 𝒰 ̇} -> X ≡ Y -> X -> Y
+Id→Fun {𝒰} = transport (𝒾𝒹 (𝒰 ̇))
+
+-- We have one alternate definition of this transport
+Id→Fun' : {X Y : 𝒰 ̇} → X ≡ Y → X → Y
+Id→Fun' (refl X) = 𝒾𝒹 X
+
+-- and we see that they are the same
+Id→Funs-agree : {X Y : 𝒰 ̇} (p : X ≡ Y)
+              → Id→Fun p ≡ Id→Fun' p
+
+Id→Funs-agree (refl X) = refl (𝒾𝒹 X)
+
+-- Defining decidable types
+decidable : 𝒰 ̇ -> 𝒰 ̇
+decidable A = A + ¬ A
+
+hasDecidableEq : 𝒰 ̇ -> 𝒰 ̇
+hasDecidableEq A = (a₀ a₁ : A) -> (a₀ ≡ a₁) + ¬ (a₀ ≡ a₁)
