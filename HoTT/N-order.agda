@@ -81,6 +81,18 @@ succLess {x} {.x} (refl .(succ x)) = refl x
 ≤trans zero (succ y) (succ z) l k = *
 ≤trans (succ x) (succ y) (succ z) l k = ≤trans x y z l k
 
+≤succ : (x : ℕ) -> x ≤ succ x
+≤succ zero = *
+≤succ (succ x) = ≤succ x
+
+zeroMin : (n : ℕ) -> 0 ≤ n
+zeroMin zero = *
+zeroMin (succ n) = zeroMin n
+
+uniqueMin : (n : ℕ) -> n ≤ 0 -> n ≡ 0
+uniqueMin zero l = refl 0
+uniqueMin (succ n) l = !𝟘 (succ n ≡ 0) l
+
 -- Associativity of addition
 +-assoc : (x y z : ℕ) -> (x +̇ y) +̇ z ≡ x +̇ (y +̇ z)
 +-assoc x y zero = ((x +̇ y) +̇ 0) ≡⟨ refl (x +̇ y) ⟩ ((x +̇ (y +̇ 0)) ■)
@@ -111,17 +123,36 @@ succxIs1Addx (succ x) = ap succ (succxIs1Addx x)
                             (succ (succ x +̇ y)) ≡⟨ ap succ (+-stepOnFirst x y) ⟩ (
                             (succ (x +̇ succ y)) ■))
 
+-- Commutativity of addition
 +-comm : (x y : ℕ) -> x +̇ y ≡ y +̇ x
 +-comm zero y = (0 +̇ y) ≡⟨ 0AddxIsx y ⟩ (y ≡⟨ refl y ⟩ ((y +̇ 0) ■))
 +-comm (succ x) y = (succ x +̇ y) ≡⟨ +-stepOnFirst x y ⟩ (
                     succ (x +̇ y) ≡⟨ ap succ (+-comm x y) ⟩ (
                     succ (y +̇ x) ≡⟨ refl _ ⟩ (
                     (y +̇ succ x)■)))
+
+-- Proving that addition is left cancellative
++-lc : (x y z : ℕ) -> x +̇ y ≡ x +̇ z -> y ≡ z
++-lc zero y z pf = y ≡⟨ (0AddxIsx y) ⁻¹ ⟩ ((0 +̇ y) ≡⟨ pf ⟩ ((0 +̇ z) ≡⟨ 0AddxIsx z ⟩ (z ■)))
++-lc (succ x) y z pf = +-lc x y z (succLess ((succ (x +̇ y)) ≡⟨ (+-stepOnFirst x y) ⁻¹ ⟩ (
+                                                (succ x +̇ y) ≡⟨ pf ⟩ (
+                                                    (succ x +̇ z) ≡⟨ (+-stepOnFirst x z) ⟩ (
+                                                        succ (x +̇ z) ■)))))
+
 -- Prove the following: x ≤ y if and only if Σ z ꞉ ℕ , x + z ≡ y.
 
-{-
 ≤ToΣ : (x y : ℕ) -> x ≤ y -> Σ z :- ℕ , (x +̇ z ≡ y)
-≤ToΣ zero zero leq = (0 , refl 0)
-≤ToΣ zero (succ y) leq = {!   !}
-≤ToΣ (succ x) (succ y) leq = {!   !}
--}
+≤ToΣ 0 0 l = 0 , refl 0
+≤ToΣ 0 (succ y) l = succ y , 0AddxIsx (succ y)
+≤ToΣ (succ x) 0 l = !𝟘 (Σ z :- ℕ , ((succ x +̇ z) ≡ 0)) l
+≤ToΣ (succ x) (succ y) l = let z : ℕ
+                               z = pr₁ (≤ToΣ x y l) 
+                           in z , ((succ x +̇ z) ≡⟨ +-stepOnFirst x z ⟩ (
+                                    succ (x +̇ z) ≡⟨ ap succ (pr₂ (≤ToΣ x y l)) ⟩ (
+                                    (succ y) ■)))
+
+ΣTo≤ : (x y : ℕ) -> Σ z :- ℕ , (x +̇ z ≡ y) -> x ≤ y
+ΣTo≤ zero zero _ = *
+ΣTo≤ zero (succ y) _ = *
+ΣTo≤ (succ x) zero (z , p) = positivesNotZero (x +̇ z) (succ (x +̇ z) ≡⟨ (+-stepOnFirst x z) ⁻¹ ⟩ ((succ x +̇ z) ≡⟨ p ⟩ (refl 0)) )
+ΣTo≤ (succ x) (succ y) (z , p) = ΣTo≤ x y (z , succLess (succ (x +̇ z) ≡⟨ (+-stepOnFirst x z) ⁻¹ ⟩ ((succ x +̇ z) ≡⟨ p ⟩ (refl (succ y)))))
