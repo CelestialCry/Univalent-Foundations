@@ -4,7 +4,7 @@ module N-order where
 
 open import Universes public
 open import MLTT public
-open Arithmetics renaming(_+_ to _+̇_)
+open Arithmetics renaming(_+_ to _+̇_) renaming(_×_ to _×̇_)
 
 _≤_ _≥_ : ℕ -> ℕ -> 𝒰₀ ̇
 
@@ -51,6 +51,7 @@ succLess {x} {.x} (refl .(succ x)) = refl x
 
 -- Note that the fith axiom is just ℕ-induction
 
+-- Decidable equality of the naturals
 ℕ-hasDecidableEquality : hasDecidableEq ℕ
 ℕ-hasDecidableEquality zero zero = inl (refl 0)
 ℕ-hasDecidableEquality zero (succ n1) = inr (≢-sym (positivesNotZero n1))
@@ -80,6 +81,42 @@ succLess {x} {.x} (refl .(succ x)) = refl x
 ≤trans zero (succ y) (succ z) l k = *
 ≤trans (succ x) (succ y) (succ z) l k = ≤trans x y z l k
 
+-- Associativity of addition
++-assoc : (x y z : ℕ) -> (x +̇ y) +̇ z ≡ x +̇ (y +̇ z)
++-assoc x y zero = ((x +̇ y) +̇ 0) ≡⟨ refl (x +̇ y) ⟩ ((x +̇ (y +̇ 0)) ■)
++-assoc x y (succ z) = ((x +̇ y) +̇ succ z) ≡⟨ refl _ ⟩
+                        (succ ((x +̇ y) +̇ z) ≡⟨ ap succ (+-assoc x y z) ⟩
+                        (succ (x +̇ (y +̇ z)) ≡⟨ refl _ ⟩
+                        ((x +̇ (y +̇ succ z)) ■))) 
+
+-- An alternate way of proving it using more of Agda's magic
++-assocAlt : (x y z : ℕ) -> (x +̇ y) +̇ z ≡ x +̇ (y +̇ z)
++-assocAlt x y zero = refl _
++-assocAlt x y (succ z) = ap succ (+-assocAlt x y z)
+
+-- Proving 0 + x = x
+0AddxIsx : (x : ℕ) -> 0 +̇ x ≡ x
+0AddxIsx zero = refl 0
+0AddxIsx (succ x) = ap succ (0AddxIsx x)
+
+-- Proving succ x = 1 + x
+succxIs1Addx : (x : ℕ) -> succ x ≡ 1 +̇ x
+succxIs1Addx zero = refl 1
+succxIs1Addx (succ x) = ap succ (succxIs1Addx x)
+
+-- One more succ ability
++-stepOnFirst : (x y : ℕ) -> (succ x) +̇ y ≡ succ (x +̇ y)
++-stepOnFirst x zero = refl _
++-stepOnFirst x (succ y) = (succ x +̇ succ y) ≡⟨ refl _ ⟩ (
+                            (succ (succ x +̇ y)) ≡⟨ ap succ (+-stepOnFirst x y) ⟩ (
+                            (succ (x +̇ succ y)) ■))
+
++-comm : (x y : ℕ) -> x +̇ y ≡ y +̇ x
++-comm zero y = (0 +̇ y) ≡⟨ 0AddxIsx y ⟩ (y ≡⟨ refl y ⟩ ((y +̇ 0) ■))
++-comm (succ x) y = (succ x +̇ y) ≡⟨ +-stepOnFirst x y ⟩ (
+                    succ (x +̇ y) ≡⟨ ap succ (+-comm x y) ⟩ (
+                    succ (y +̇ x) ≡⟨ refl _ ⟩ (
+                    (y +̇ succ x)■)))
 -- Prove the following: x ≤ y if and only if Σ z ꞉ ℕ , x + z ≡ y.
 
 {-
