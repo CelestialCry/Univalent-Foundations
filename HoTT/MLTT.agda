@@ -33,6 +33,9 @@ data 𝟘 : 𝒰₀ ̇ where
 𝟘-induction : {A : 𝟘 -> 𝒰 ̇} -> (x : 𝟘) -> A x
 𝟘-induction ()
 
+𝟘!-induction : (A : 𝟘 -> 𝒰 ̇) -> (x : 𝟘) -> A x
+𝟘!-induction X ()
+
 𝟘-recursion : {A : 𝒰 ̇} -> 𝟘 -> A
 𝟘-recursion ()
 
