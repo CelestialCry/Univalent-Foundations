@@ -104,24 +104,24 @@ EM'-gives-EM em' X s = γ (em' X s)
 -- This shows that excluded middle under univalence says that either X is 𝟙 or X is 𝟘. Note that we cannot in general prove that a -1-type follows LEM.
 
 module magmas where
+  -- As usual a magma is a type, which is a set together with a binary operator
+  Magma : (𝒰 : Universe) -> 𝒰 ⁺ ̇
+  Magma 𝒰 = Σ X :- 𝒰 ̇ , ((isSet X) × (X -> X -> X))
+  -- The type Magma is a collection of all magmas in 𝒰. Thus if X : 𝒰 is a magma, (X, _ , _) : Magma 𝒰.
 
-    -- As usual a magma is a type, which is a set together with a binary operator
-    Magma : (𝒰 : Universe) -> 𝒰 ⁺ ̇
-    Magma 𝒰 = Σ X :- 𝒰 ̇ , ((isSet X) × (X -> X -> X))
-    -- The type Magma is a collection of all magmas in 𝒰. Thus if X : 𝒰 is a magma, (X, _ , _) : Magma 𝒰.
+  -- We define to easier see what is going on:
+  ⟨_⟩ : Magma 𝒰 -> 𝒰 ̇
+  ⟨ X , (_ , _) ⟩ = X
 
-    -- We define to easier see what is going on:
-    ⟨_⟩ : Magma 𝒰 -> 𝒰 ̇
-    ⟨ X , (_ , _) ⟩ = X
+  magmaIsSet : (M : Magma 𝒰) -> isSet ⟨ M ⟩
+  magmaIsSet (_ , (i , _)) = i
 
-    magmaIsSet : (M : Magma 𝒰) -> isSet ⟨ M ⟩
-    magmaIsSet (_ , (i , _)) = i
+  magmaOperation : (M : Magma 𝒰) -> ⟨ M ⟩ -> ⟨ M ⟩ -> ⟨ M ⟩
+  magmaOperation (_ , (_ , _<>_)) = _<>_
 
-    magmaOperation : (M : Magma 𝒰) -> ⟨ M ⟩ -> ⟨ M ⟩ -> ⟨ M ⟩
-    magmaOperation (_ , (_ , _<>_)) = _<>_
+  syntax magmaOperation M x y = x < M > y
 
-    syntax magmaOperation M x y = x < M > y
-
+  private
     -- Looking at homomorphisms and isomorphisms of magmas
     isMagmaHom : (M N : Magma 𝒰) -> (⟨ M ⟩ -> ⟨ N ⟩) -> 𝒰 ̇
     isMagmaHom M N f = (x y : ⟨ M ⟩) -> f (x < M > y) ≡ f x < N > f y
@@ -140,4 +140,32 @@ module magmas where
     Id→Iso eq = transport ⟨_⟩ eq
 
     Id→IsoIsIso : {M N : Magma 𝒰} (p : M ≡ N) -> isMagmaIso M N (Id→Iso p)
-    Id→IsoIsIso (refl M) = idIsMagmaIso M 
+    Id→IsoIsIso (refl M) = idIsMagmaIso M
+
+    _≅ₘ_ : Magma 𝒰 -> Magma 𝒰 -> 𝒰 ̇
+    M ≅ₘ N = Σ f :- (⟨ M ⟩ -> ⟨ N ⟩), isMagmaIso M N f
+
+module monoids where
+  -- Defining monoids
+  
+  leftNeutral : {X : 𝒰 ̇} -> X -> (X -> X -> X) -> 𝒰 ̇
+  leftNeutral e _<>_ = ∀ x -> e <> x ≡ x
+
+  rightNeutral : {X : 𝒰 ̇} -> X -> (X -> X -> X) -> 𝒰 ̇
+  rightNeutral e _<>_ = ∀ x -> x <> e ≡ x
+
+  associative : {X : 𝒰 ̇} -> (X -> X -> X) -> 𝒰 ̇
+  associative _<>_ = ∀ x y z -> (x <> y) <> z ≡ x <> (y <> z)
+
+  -- Definition of all monoids
+  Monoid : (𝒰 : Universe) -> 𝒰 ⁺  ̇
+  Monoid 𝒰 = 
+    Σ X :- 𝒰 ̇ , (
+      isSet X × (
+        Σ _<>_ :- (X -> X -> X) , (
+          Σ e :- X , (
+            (leftNeutral e _<>_) × (rightNeutral e _<>_) × (associative _<>_)
+            )   
+          )
+        )
+      )
